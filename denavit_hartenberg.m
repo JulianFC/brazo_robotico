@@ -1,6 +1,4 @@
 function P = denavit_hartenberg( theta1, theta2, theta3, theta4 )
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
 
 L1 = 1;
 L2 = 1;
