@@ -2,7 +2,7 @@ import random
 from deap import creator, base, tools, algorithms
 from math import pi
 from denavit_hartenberg import direct_problem
-from animation import *
+from arm_animation import *
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
