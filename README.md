@@ -1,5 +1,5 @@
-# Algoritmos genéticos para resolver la cinemática inversa de un manipulador robótico.
+### Algoritmos genéticos para resolver la cinemática inversa de un manipulador robótico.
 
-## Integrantes: 
-## Julián Fuchslocher C.
-## Nicolás Sepúlveda H.
+Integrantes: 
+Julián Fuchslocher C.
+Nicolás Sepúlveda H.
