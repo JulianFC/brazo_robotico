@@ -36,14 +36,14 @@ while i < 10:
 
     toolbox.register("evaluate", evalOneMax, obj=objective)
     toolbox.register("mate", tools.cxUniform, indpb=0.25)
-    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
+    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.05, indpb=0.5)
     toolbox.register("select", tools.selTournament, tournsize=3)
 
     population = toolbox.population(n=300)
 
-    NGEN=100
+    NGEN=200
     for gen in range(NGEN):
-        offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)
+        offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.4)
         fits = toolbox.map(toolbox.evaluate, offspring)
         for fit, ind in zip(fits, offspring):
             ind.fitness.values = fit
@@ -66,9 +66,9 @@ while i < 10:
 
 print("Objetivo:\t\t\t\t\t\tResultado:\t\t\t\t\t\tError:\n")
 for i in range(10):
-    objectives[i] = [round(objectives[i][j],4) for j in range(3)]
-    results[i] = [round(results[i][j],4) for j in range(3)]
-    error = [round(abs(results[i][j]-objectives[i][j]),4) for j in range(3)]
+    objectives[i] = [round(objectives[i][j], 4) for j in range(3)]
+    results[i] = [round(results[i][j], 4) for j in range(3)]
+    error = [round(abs(results[i][j]-objectives[i][j]), 4) for j in range(3)]
     print(str(objectives[i])+"\t"+str(results[i])+"\t"+str(error)+"\n")
 
 plt.plot(X,fitness_evolution)
@@ -76,3 +76,5 @@ plt.xlabel("Generación")
 plt.ylabel("Fitness")
 plt.title("Evolución del fitness en el tiempo")
 plt.show()
+
+print(fitness_evolution)
