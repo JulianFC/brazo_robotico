@@ -56,6 +56,15 @@ def energy_fitness(individual, start_p, final_p):
 
     return energy,
 
+def mutGaussian(individual, mu, sigma, indpb):
+    size = len(individual)
+    for i in range(20):
+        for j in range(4):
+            if random.random() < indpb:
+                individual[i][j] += random.gauss(mu, sigma)
+
+    return individual,
+
 objectives = []
 results = []
 i = 0
@@ -65,13 +74,13 @@ X = []
 
 toolbox.register("evaluate", energy_fitness, start_p = start, final_p = objective)
 toolbox.register("mate", crossover, indpb=0.25)
-toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.2, indpb=0.3)
+toolbox.register("mutate", mutGaussian, mu=0, sigma=0.5, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=5)
 
 population = toolbox.population(n=100)
-NGEN=300
+NGEN=1000
 for gen in range(NGEN):
-    offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)
+    offspring = algorithms.varAnd(population, toolbox, cxpb=1, mutpb=1)
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):
         ind.fitness.values = fit
@@ -145,6 +154,8 @@ plt.show()
 
 Theta0 = []
 Theta1 = []
+Theta2 = []
+Theta3 = []
 for i in range(4):
     print("[", end='')
     for j in range(20):
@@ -152,16 +163,30 @@ for i in range(4):
             Theta0.append(top300[j][i])
         if i == 1:
             Theta1.append(top300[j][i])
-        print(str(top300[j][i])+", ",end = '')
+        if i == 2:
+            Theta2.append(top300[j][i])
+        if i == 3:
+            Theta3.append(top300[j][i])
+        print(str(top300[j][i])+", ", end='')
     print("]")
 plt.plot(Theta0)
 plt.plot(Theta1)
-plt.legend(["Angulo 1", "Angulo 2"])
+plt.plot(Theta2)
+plt.plot(Theta3)
+plt.legend(["Angulo 1", "Angulo 2", "Angulo 3", "Angulo 4"])
 plt.title("Top last gen")
 plt.show()
 
-#animate_path(top)
-#animate(top[0], top[19])
+plt.plot(X, fitness_evolution)
+plt.xlabel("Generación")
+plt.ylabel("Fitness")
+plt.title("Evolución del fitness en el tiempo")
+plt.show()
+
+print(fitness_evolution[-1])
+
+animate_path(top300)
+#animate(top300[0], top300[19])
     #print(P)
     #print(objective)
 
@@ -172,15 +197,11 @@ plt.show()
 #     error = [round(abs(results[i][j]-objectives[i][j]), 4) for j in range(3)]
 #     print(str(objectives[i])+"\t"+str(results[i])+"\t"+str(error)+"\n")
 #
-plt.plot(X,fitness_evolution)
-plt.xlabel("Generación")
-plt.ylabel("Fitness")
-plt.title("Evolución del fitness en el tiempo")
-plt.show()
+
 #plt.plot(Theta0)
 #plt.plot(Theta1)
 #plt.legend(["Angulo 1", "Angulo 2"])
 #plt.show()
-print(fitness_evolution[-1])
+
 #
 # print(fitness_evolution)

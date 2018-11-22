@@ -76,7 +76,7 @@ def animate_path(individual):
     # Set up formatting for the movie files
 
     line_ani.save('sample.gif', writer='imagemagick')
-    plt.show()
+    #plt.show()
 
     for i in range(4):
         ax.plot3D(QT[0, i:i + 2], QT[1, i:i + 2], QT[2, i:i + 2], linewidth=6)
