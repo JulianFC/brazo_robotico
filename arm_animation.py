@@ -75,7 +75,7 @@ def animate_path(individual):
 
     # Set up formatting for the movie files
 
-    line_ani.save('sample.gif', writer='imagemagick')
+    line_ani.save('Arm.gif', writer='imagemagick')
     #plt.show()
 
     for i in range(4):
