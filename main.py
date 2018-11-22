@@ -1,80 +1,186 @@
 import random
+import numpy as np
 from deap import creator, base, tools, algorithms
 from math import pi
 from denavit_hartenberg import direct_problem
 from arm_animation import *
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", list, fitness=creator.FitnessMax)
+creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 
-toolbox.register("attr_bool", random.uniform, -pi, pi)
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, n=4)
+
+def init2d(icls, shape, start, objective):
+    tray0 = np.linspace(start[0],objective[0],20)
+    tray1 = np.linspace(start[1], objective[1], 20)
+    tray2 = np.linspace(start[2], objective[2], 20)
+    tray3 = np.linspace(start[3], objective[3], 20)
+
+
+    Theta = []
+    for i in range(20):
+        Theta.append(np.array([tray0[i],tray1[i],tray2[i],tray3[i]]))
+    Theta = Theta + np.random.uniform(-0.75,0.75,shape)
+    return icls(np.random.uniform(-pi,pi,shape))
+
+start = [random.uniform(-pi,pi), random.uniform(-pi,pi), random.uniform(-pi,pi),random.uniform(-pi,pi)]
+objective = [random.uniform(-pi,pi),random.uniform(-pi,pi),random.uniform(-pi,pi),random.uniform(-pi,pi)]
+
+#toolbox.register("attr_bool", random.uniform, -pi, pi)
+toolbox.register("individual", init2d, creator.Individual,  shape=(20,4), start = start, objective = objective)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
+def crossover(ind1, ind2, indpb):
+    for i in range(4):
+        if random.random() < indpb:
+            lam = random.random()
+            ind1[i], ind2[i] = lam*ind1[i]+(1-lam)*ind2[i], lam*ind2[i]+(1-lam)*ind1[i]
+    return ind1, ind2
 
-def evalOneMax(individual, obj):
-    QT, P = direct_problem(individual, 4)
-    diff = 0
-    for (coord, obj_coord) in zip(P, obj):
-        diff = diff + abs(coord - obj_coord)
-    return 1 / (1+diff),
+def energy_fitness(individual, start_p, final_p):
+    energy = 0
+    W = [1.5,3,2,1]
 
+    for i in range(21):
+        delta = 0
+        for j in range(4):
+            if i == 0:
+                delta = delta + W[j]*abs(start_p[j] - individual[i][j])
+            elif i == 20:
+                delta = delta + W[j]*abs(final_p[j] - individual[i-1][j])
+            else:
+                delta = delta + W[j] * abs(individual[i][j] - individual[i - 1][j])
+        energy = energy + delta
+
+    return energy,
 
 objectives = []
 results = []
 i = 0
 fitness_evolution = []
 X = []
-while i < 10:
-    i = i+1
 
 
+toolbox.register("evaluate", energy_fitness, start_p = start, final_p = objective)
+toolbox.register("mate", crossover, indpb=0.25)
+toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.2, indpb=0.3)
+toolbox.register("select", tools.selTournament, tournsize=5)
 
-    objective = [random.uniform(-2,2),random.uniform(-2,2),random.uniform(0,3)]
+population = toolbox.population(n=100)
+NGEN=300
+for gen in range(NGEN):
+    offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)
+    fits = toolbox.map(toolbox.evaluate, offspring)
+    for fit, ind in zip(fits, offspring):
+        ind.fitness.values = fit
+    population = toolbox.select(offspring, k=len(population))
 
-    toolbox.register("evaluate", evalOneMax, obj=objective)
-    toolbox.register("mate", tools.cxUniform, indpb=0.25)
-    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.05, indpb=0.5)
-    toolbox.register("select", tools.selTournament, tournsize=3)
+    if gen == 0:
+        top0 = tools.selBest(population, k=1)[0]
+    if gen == 100:
+        top100 = tools.selBest(population, k=1)[0]
+    if gen == 200:
+        top200 = tools.selBest(population, k=1)[0]
+    top300 = tools.selBest(population, k=1)[0]
+    fitness_evolution.append(energy_fitness(top300, start, objective))
+    X.append(gen)
 
-    population = toolbox.population(n=300)
+#top10 = tools.selBest(population, k=10)
 
-    NGEN=200
-    for gen in range(NGEN):
-        offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.4)
-        fits = toolbox.map(toolbox.evaluate, offspring)
-        for fit, ind in zip(fits, offspring):
-            ind.fitness.values = fit
-        population = toolbox.select(offspring, k=len(population))
+#
+#print(top10)
+QT = []
+P = []
+for i in range(20):
+    qt, p = direct_problem(top300[i], 4)
+    #print(top[i])
+    QT.append(qt)
+    P.append(p)
+objectives.append(objective)
+results.append(P)
 
-        top = tools.selBest(population, k=1)[0]
-        if (i == 9):
-            fitness_evolution.append(evalOneMax(top, objective))
-            X.append(gen)
+Theta0 = []
+Theta1 = []
+for i in range(4):
+    for j in range(20):
+        if i == 0:
+            Theta0.append(top0[j][i])
+        if i == 1:
+            Theta1.append(top0[j][i])
+plt.plot(Theta0)
+plt.plot(Theta1)
+plt.legend(["Angulo 1", "Angulo 2"])
+plt.title("Top gen 0")
+plt.show()
 
-    #top10 = tools.selBest(population, k=10)
+Theta0 = []
+Theta1 = []
+for i in range(4):
+    for j in range(20):
+        if i == 0:
+            Theta0.append(top100[j][i])
+        if i == 1:
+            Theta1.append(top100[j][i])
+plt.plot(Theta0)
+plt.plot(Theta1)
+plt.legend(["Angulo 1", "Angulo 2"])
+plt.title("Top gen 100")
+plt.show()
 
-    #animate([random.uniform(-pi, pi), random.uniform(-pi, pi), random.uniform(-pi, pi), random.uniform(-pi, pi)], top)
-    #print(top10)
-    QT, P = direct_problem(top, 4)
-    objectives.append(objective)
-    results.append(P)
+Theta0 = []
+Theta1 = []
+for i in range(4):
+    for j in range(20):
+        if i == 0:
+            Theta0.append(top200[j][i])
+        if i == 1:
+            Theta1.append(top200[j][i])
+plt.plot(Theta0)
+plt.plot(Theta1)
+plt.legend(["Angulo 1", "Angulo 2"])
+plt.title("Top gen 200")
+plt.show()
+
+Theta0 = []
+Theta1 = []
+for i in range(4):
+    print("[", end='')
+    for j in range(20):
+        if i == 0:
+            Theta0.append(top300[j][i])
+        if i == 1:
+            Theta1.append(top300[j][i])
+        print(str(top300[j][i])+", ",end = '')
+    print("]")
+plt.plot(Theta0)
+plt.plot(Theta1)
+plt.legend(["Angulo 1", "Angulo 2"])
+plt.title("Top last gen")
+plt.show()
+
+#animate_path(top)
+#animate(top[0], top[19])
     #print(P)
     #print(objective)
 
-print("Objetivo:\t\t\t\t\t\tResultado:\t\t\t\t\t\tError:\n")
-for i in range(10):
-    objectives[i] = [round(objectives[i][j], 4) for j in range(3)]
-    results[i] = [round(results[i][j], 4) for j in range(3)]
-    error = [round(abs(results[i][j]-objectives[i][j]), 4) for j in range(3)]
-    print(str(objectives[i])+"\t"+str(results[i])+"\t"+str(error)+"\n")
-
+# print("Objetivo:\t\t\t\t\t\tResultado:\t\t\t\t\t\tError:\n")
+# for i in range(10):
+#     objectives[i] = [round(objectives[i][j], 4) for j in range(3)]
+#     results[i] = [round(results[i][j], 4) for j in range(3)]
+#     error = [round(abs(results[i][j]-objectives[i][j]), 4) for j in range(3)]
+#     print(str(objectives[i])+"\t"+str(results[i])+"\t"+str(error)+"\n")
+#
 plt.plot(X,fitness_evolution)
 plt.xlabel("Generación")
 plt.ylabel("Fitness")
 plt.title("Evolución del fitness en el tiempo")
 plt.show()
-
-print(fitness_evolution)
+#plt.plot(Theta0)
+#plt.plot(Theta1)
+#plt.legend(["Angulo 1", "Angulo 2"])
+#plt.show()
+print(fitness_evolution[-1])
+#
+# print(fitness_evolution)
