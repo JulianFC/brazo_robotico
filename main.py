@@ -10,7 +10,16 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
-
+## meeting 2
+'''
+1.- revisar crossover.
+2.- verificar función de energíua y quizás optimizar punto final.
+3.- sumar gaussianas en el proceso de mutación, en vez de mutar cada ángulo de los individuos.
+4.- variar los operadores y probar operador de migración.
+5.- fijar la competencia de los torneos en 2.
+6.- revisar paper de los algoritmos geneticos para ver funciones (paper correo
+7.- Trabajando problema separado).
+'''
 
 M = 20
 def init2d(icls, shape, start, objective):
@@ -221,7 +230,7 @@ plt.show()
 
 print("Ultimo fitness: "+str(max_fitness_evolution[-1]))
 #Python animation:
-#animate_path(topF)
+animate_path(topF)
 
 
 # print("Objetivo:\t\t\t\t\t\tResultado:\t\t\t\t\t\tError:\n")
