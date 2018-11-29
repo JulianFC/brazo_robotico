@@ -127,15 +127,12 @@ for gen in range(NGEN):
     max_fitness_evolution.append(energy_fitness(topF, start, objective)[0])
     X.append(gen)
 
-#top10 = tools.selBest(population, k=10)
 
-#
-#print(top10)
 QT = []
 P = []
 for i in range(M):
     qt, p = direct_problem(topF[i], 4)
-    #print(top[i])
+
     QT.append(qt)
     P.append(p)
 objectives.append(objective)
@@ -158,41 +155,7 @@ for i in range(4):
     plt.legend(["Generación "+str(gen0), "Generación "+str(gen1), "Generación "+str(gen2), "Generación "+str(NGEN)])
     plt.title("Angulo "+str(i))
     plt.show()
-#plt.plot(Theta0)
-#plt.plot(Theta1)
-#plt.legend(["Angulo 1", "Angulo 2"])
-#plt.title("Top gen 100")
-#plt.show()
-#
-#
-# Theta0 = []
-# Theta1 = []
-# for i in range(4):
-#     for j in range(M):
-#         if i == 0:
-#             Theta0.append(top100[j][i])
-#         if i == 1:
-#             Theta1.append(top100[j][i])
-# plt.plot(Theta0)
-# plt.plot(Theta1)
-# plt.legend(["Angulo 1", "Angulo 2"])
-# plt.title("Top gen 100")
-# plt.show()
-#
-# Theta0 = []
-# Theta1 = []
-# for i in range(4):
-#     for j in range(M):
-#         if i == 0:
-#             Theta0.append(top200[j][i])
-#         if i == 1:
-#             Theta1.append(top200[j][i])
-# plt.plot(Theta0)
-# plt.plot(Theta1)
-# plt.legend(["Angulo 1", "Angulo 2"])
-# plt.title("Top gen 200")
-# plt.show()
-#
+
 
 #Matlab animation:
 Theta0 = []
@@ -212,39 +175,16 @@ for i in range(4):
             Theta3.append(topF[j][i])
         print(str(topF[j][i])+", ", end='')
     print("]")
-# plt.plot(Theta0)
-# plt.plot(Theta1)
-# plt.plot(Theta2)
-# plt.plot(Theta3)
-# plt.legend(["Angulo 1", "Angulo 2", "Angulo 3", "Angulo 4"])
-# plt.title("Top last gen")
-# plt.show()
 
 plt.plot(X, max_fitness_evolution)
 plt.xlabel("Generación")
 plt.ylabel("Fitness")
 plt.title("Evolución del mejor fitness y el fitness promedio en el tiempo")
-plt.plot(X, max_fitness_evolution)
+plt.plot(X, avg_fitness_evolution)
 plt.legend(["Mejor", "Promedio"])
 plt.show()
 
 print("Ultimo fitness: "+str(max_fitness_evolution[-1]))
 #Python animation:
-animate_path(topF)
+#animate_path(topF)
 
-
-# print("Objetivo:\t\t\t\t\t\tResultado:\t\t\t\t\t\tError:\n")
-# for i in range(10):
-#     objectives[i] = [round(objectives[i][j], 4) for j in range(3)]
-#     results[i] = [round(results[i][j], 4) for j in range(3)]
-#     error = [round(abs(results[i][j]-objectives[i][j]), 4) for j in range(3)]
-#     print(str(objectives[i])+"\t"+str(results[i])+"\t"+str(error)+"\n")
-#
-
-#plt.plot(Theta0)
-#plt.plot(Theta1)
-#plt.legend(["Angulo 1", "Angulo 2"])
-#plt.show()
-
-#
-# print(fitness_evolution)
