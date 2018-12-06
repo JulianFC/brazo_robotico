@@ -114,10 +114,10 @@ for gen in range(NGEN):
     if gen == gen0:
         top0 = tools.selBest(population, k=1)[0]
 
-    #if gen == 5:# ARREGLAR CROSSOVER
-    #    best0 = tools.selBest(population, k=10)
-    #    for i in range(10):
-    #       print(best0[i])
+    if gen == 5:# ARREGLAR CROSSOVER
+        best0 = tools.selBest(population, k=10)
+        for i in range(10):
+           print(best0[i])
     if gen == gen1:
         top1 = tools.selBest(population, k=1)[0]
 

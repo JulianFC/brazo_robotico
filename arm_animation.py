@@ -74,8 +74,9 @@ def animate_path(individual):
                                        interval=200, blit=True, repeat=True)
 
     # Set up formatting for the movie files
-
-    line_ani.save('Arm.gif', writer='imagemagick')
+    #Writer = animation.writers['ffmpeg']
+    #writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1080)
+    #line_ani.save('Arm.mp4', writer=writer)
     #plt.show()
 
     for i in range(4):
@@ -109,6 +110,8 @@ def animate(start, end):
     ax.set_title('3D Test')
 
     # Creating the Animation object
+
+
     line_ani = animation.FuncAnimation(fig, update_lines,  frames=200, fargs=(QT, lines, end),
                                        interval=10, blit=True,repeat=False)
 

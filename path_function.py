@@ -3,6 +3,7 @@ import numpy as np
 from deap import creator, base, tools, algorithms
 from math import pi
 from denavit_hartenberg import direct_problem
+from operator import attrgetter
 from arm_animation import *
 
 
@@ -47,13 +48,34 @@ def crossover(ind1, ind2, indpb):
             ind1[i], ind2[i] = lam*ind1[i]+(1-lam)*ind2[i], lam*ind2[i]+(1-lam)*ind1[i]
     return ind1, ind2
 
-def mutGaussian(individual, mu, sigma, indpb):
+def mutGaussian(individual, mu, sigma, indpb,alpha):
     M = len(individual)
-    for i in range(M):
+    if random.random() <= alpha:
+        for i in range(M):
+            for j in range(4):
+                if random.random() < indpb:
+                    individual[i][j] += random.gauss(mu, sigma)
+    else:
+        sigma = np.random.uniform(M/7,M/2,4)
+        mu = np.random.uniform(-M/8,M/8,4)+M/2
+        x = np.linspace(0,M-1,M)
+        h = np.random.uniform(-1,1,4)
         for j in range(4):
-            if random.random() < indpb:
-                individual[i][j] += random.gauss(mu, sigma)
+            gauss = np.exp(-np.power(x - mu[j], 2.) / (2 * np.power(sigma[j], 2.)))*h[j]
+            for i in range(M):
+                individual[i][j] += gauss[i]
+
     return individual,
+
+def selection(individuals, k, tournsize, alpha, fit_attr="fitness"):
+    chosen = []
+    N = int(k*alpha)
+    for i in range(N):
+        aspirants = tools.selRandom(individuals, tournsize)
+        chosen.append(max(aspirants, key=attrgetter(fit_attr)))
+
+    new = tools.selRandom(individuals,k-N)
+    return chosen+new
 
 def avg_fitness(population,sp,fp):
     fitness = np.array([])
@@ -62,16 +84,16 @@ def avg_fitness(population,sp,fp):
     return np.average(fitness)
 
 
-def get_path(start_p, final_p, M, plot=False):
+def get_path(start_p, final_p, M, plot=False, matlab=True):
     toolbox = base.Toolbox()
     toolbox.register("individual", init2d, creator.Individual, shape=(M, 4), start=start_p, objective=final_p)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("evaluate", energy_fitness, start_p=start_p, final_p=final_p)
-    toolbox.register("mate", crossover, indpb=0.75)
-    toolbox.register("mutate", mutGaussian, mu=0, sigma=0.05, indpb=0.3)
-    toolbox.register("select", tools.selTournament, tournsize=4)
+    toolbox.register("mate", crossover, indpb=0.45)
+    toolbox.register("mutate", mutGaussian, mu=0, sigma=0.05, indpb=0.3, alpha=0.6)
+    toolbox.register("select", selection, tournsize=3, alpha=0.8)
 
-    population = toolbox.population(n=100)
+    population = toolbox.population(n=150)
 
     objectives = []
     results = []
@@ -79,13 +101,13 @@ def get_path(start_p, final_p, M, plot=False):
     avg_fitness_evolution = []
     X = []
 
-    NGEN = 800
+    NGEN = 1000
     gen0 = 0
     gen1 = int(NGEN / 3)
     gen2 = int(NGEN * 2 / 3)
     for gen in range(NGEN):
         avg_fitness_evolution.append(avg_fitness(population, start_p, final_p))
-        offspring = algorithms.varAnd(population, toolbox, cxpb=1, mutpb=1)
+        offspring = algorithms.varAnd(population, toolbox, cxpb=0.8, mutpb=1)
         fits = toolbox.map(toolbox.evaluate, offspring)
         for fit, ind in zip(fits, offspring):
             ind.fitness.values = fit
@@ -93,10 +115,10 @@ def get_path(start_p, final_p, M, plot=False):
         if gen == gen0:
             top0 = tools.selBest(population, k=1)[0]
 
-        # if gen == 5:# ARREGLAR CROSSOVER
-        #    best0 = tools.selBest(population, k=10)
-        #    for i in range(10):
-        #       print(best0[i])
+        #if gen == 5:# ARREGLAR CROSSOVER
+        ##   best0 = tools.selBest(population, k=10)
+         #  for i in range(10):
+         #     print(best0[i])
         if gen == gen1:
             top1 = tools.selBest(population, k=1)[0]
 
@@ -135,11 +157,83 @@ def get_path(start_p, final_p, M, plot=False):
             plt.title("Angulo " + str(i))
             plt.show()
 
+        plt.plot(X, max_fitness_evolution)
+        plt.xlabel("Generación")
+        plt.ylabel("Fitness")
+        plt.title("Evolución del mejor fitness y el fitness promedio en el tiempo")
+        plt.plot(X, avg_fitness_evolution)
+        plt.legend(["Mejor", "Promedio"])
+        plt.show()
+
+    if matlab:
         # Matlab animation:
         Theta0 = []
         Theta1 = []
         Theta2 = []
         Theta3 = []
+        for i in range(4):
+            print("[", end='')
+            for j in range(M):
+                if i == 0:
+                    Theta0.append(top0[j][i])
+                if i == 1:
+                    Theta1.append(top0[j][i])
+                if i == 2:
+                    Theta2.append(top0[j][i])
+                if i == 3:
+                    Theta3.append(top0[j][i])
+                if j == M - 1:
+                    print(str(top0[j][i]), end='')
+                else:
+                    print(str(top0[j][i]) + ", ", end='')
+            print("];")
+        print("\n")
+        Theta0 = []
+        Theta1 = []
+        Theta2 = []
+        Theta3 = []
+        for i in range(4):
+            print("[", end='')
+            for j in range(M):
+                if i == 0:
+                    Theta0.append(top1[j][i])
+                if i == 1:
+                    Theta1.append(top1[j][i])
+                if i == 2:
+                    Theta2.append(top1[j][i])
+                if i == 3:
+                    Theta3.append(top1[j][i])
+                if j == M - 1:
+                    print(str(top1[j][i]), end='')
+                else:
+                    print(str(top1[j][i]) + ", ", end='')
+            print("];")
+        Theta0 = []
+        Theta1 = []
+        Theta2 = []
+        Theta3 = []
+        print("\n")
+        for i in range(4):
+            print("[", end='')
+            for j in range(M):
+                if i == 0:
+                    Theta0.append(top2[j][i])
+                if i == 1:
+                    Theta1.append(top2[j][i])
+                if i == 2:
+                    Theta2.append(top2[j][i])
+                if i == 3:
+                    Theta3.append(top2[j][i])
+                if j == M - 1:
+                    print(str(top2[j][i]), end='')
+                else:
+                    print(str(top2[j][i]) + ", ", end='')
+            print("];")
+        Theta0 = []
+        Theta1 = []
+        Theta2 = []
+        Theta3 = []
+        print("\n")
         for i in range(4):
             print("[", end='')
             for j in range(M):
@@ -151,19 +245,16 @@ def get_path(start_p, final_p, M, plot=False):
                     Theta2.append(topF[j][i])
                 if i == 3:
                     Theta3.append(topF[j][i])
-                print(str(topF[j][i]) + ", ", end='')
-            print("]")
+                if j == M - 1:
+                    print(str(topF[j][i]), end='')
+                else:
+                    print(str(topF[j][i]) + ", ", end='')
+            print("];")
 
-        plt.plot(X, max_fitness_evolution)
-        plt.xlabel("Generación")
-        plt.ylabel("Fitness")
-        plt.title("Evolución del mejor fitness y el fitness promedio en el tiempo")
-        plt.plot(X, avg_fitness_evolution)
-        plt.legend(["Mejor", "Promedio"])
-        plt.show()
 
-        print("Ultimo fitness: " + str(max_fitness_evolution[-1]))
-        # Python animation:
-        # animate_path(topF)
+
+    print("\nUltimo fitness: " + str(max_fitness_evolution[-1]))
+    # Python animation:
+    #animate_path(topF)
     return
 

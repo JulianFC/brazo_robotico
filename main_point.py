@@ -2,11 +2,11 @@ import random
 import point_function
 import path_function
 from deap import creator, base, tools, algorithms
-from math import pi
-from denavit_hartenberg import direct_problem
+from operator import attrgetter
+from math import sqrt
 from arm_animation import *
 
-objective = [random.uniform(-2,2),random.uniform(-2,2),random.uniform(0,3)]
+objective = [random.uniform(-1.5,1.5),random.uniform(-1.5,1.5),random.uniform(0.5,2.5)]
 toolbox_point = point_function.init(objective)
 
 
@@ -21,13 +21,23 @@ toolbox.register("attr_bool",  point_function.get_individual, toolbox_point)
 #toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, n = 1)
 toolbox.register("population", tools.initRepeat, list, toolbox.attr_bool)
 
+def selection(individuals, k, tournsize, alpha, fit_attr="fitness"):
+    chosen = []
+    N = int(k*alpha)
+    for i in range(N):
+        aspirants = tools.selRandom(individuals, tournsize)
+        chosen.append(max(aspirants, key=attrgetter(fit_attr)))
+
+    new = tools.selRandom(individuals,k-N)
+    return chosen+new
 
 def energy_fitness(individual, start_p, objective):
     QT, P = direct_problem(individual, 4)
     diff = 0
     for (coord, obj_coord) in zip(P, objective):
         diff = diff + abs(coord - obj_coord)**2
-    if diff > 0.1:
+    diff = sqrt(diff)
+    if diff > 0.05:
         return 10000,
 
     energy = 0
@@ -56,18 +66,19 @@ X = []
 
 toolbox.register("evaluate", energy_fitness, objective=objective, start_p = start_p)
 toolbox.register("mate", tools.cxBlend, alpha=0)
-toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.05, indpb=0.1)
-toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.05, indpb=0.4)
+#toolbox.register("select", tools.selTournament, tournsize=2)
+toolbox.register("select", selection, tournsize=3, alpha=0.8)
 
-population = toolbox.population(n=100)
-NGEN=150
+population = toolbox.population(n=150)
+NGEN=100
 gen0 = 0
 gen1 = int(NGEN*1/3)
 gen2 = int(NGEN*2/3)
 gen3 = NGEN
 for gen in range(NGEN):
     avg_fitness_evolution.append(avg_fitness(population, start_p, objective))
-    offspring = algorithms.varAnd(population, toolbox, cxpb=0, mutpb=0.1)
+    offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.4)
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):
         ind.fitness.values = fit
@@ -93,21 +104,37 @@ QT, P = direct_problem(top, 4)
 plt.plot(X, fitness_evolution)
 plt.xlabel("Generación")
 plt.ylabel("Fitness")
-plt.title("Evolución del mejor fitness y el fitness promedio en el tiempo")
-plt.plot(X, avg_fitness_evolution)
+plt.title("Evolución del mejor fitness y el fitness promedio en el tiempo, punto final.")
+#plt.plot(X, avg_fitness_evolution)
 plt.legend(["Mejor", "Promedio"])
 plt.show()
 
-plt.plot([1,2,3,4], start_p,"ro")
-plt.plot([1,2,3,4], top0,"bo", markerfacecolor="None")
-plt.plot([1,2,3,4], top1,"go", markerfacecolor="None")
-plt.plot([1,2,3,4], top2,"yo", markerfacecolor="None")
-plt.plot([1,2,3,4], top3,"k+")
-plt.legend(["Punto inicial", "Generación "+str(gen0), "Generación "+str(gen1), "Generación "+str(gen2), "Generación "+str(gen3)])
+diff0 = []
+diff1 = []
+diff2 = []
+diff3 = []
+for i in range(4):
+    diff0.append(abs(top0[i]-start_p[i]))
+    diff1.append(abs(top1[i]-start_p[i]))
+    diff2.append(abs(top2[i]-start_p[i]))
+    diff3.append(abs(top3[i]-start_p[i]))
+
+
+#plt.plot([1,2,3,4], start_p,"ro")
+plt.plot([1,2,3,4], diff0,"bo", markerfacecolor="None")
+plt.plot([1,2,3,4], diff1,"go", markerfacecolor="None")
+plt.plot([1,2,3,4], diff2,"yo", markerfacecolor="None")
+plt.plot([1,2,3,4], diff3,"k+")
+plt.legend(["Generación "+str(gen0), "Generación "+str(gen1), "Generación "+str(gen2), "Generación "+str(gen3)])
+plt.title("Evolución de los mejores ángulos en 4 generaciones.")
+plt.xlabel("Angulo")
+plt.ylabel("Distancia a la posición inicial.")
 plt.show()
 print("Objective: " + str(objective))
 print("result: " + str(P))
-print(fitness_evolution)
 
-best0 = path_function.get_path(start_p, top0, 20, plot=True)
+
+#best0 = path_function.get_path(start_p, top0, 20, plot=False, matlab=False)
+#best1 = path_function.get_path(start_p, top1, 20, plot=False, matlab=False)
+#best2 = path_function.get_path(start_p, top2, 20, plot=False, matlab=False)
 best = path_function.get_path(start_p, top3, 20, plot=True)
