@@ -255,6 +255,10 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
 
     print("\nUltimo fitness: " + str(max_fitness_evolution[-1]))
     # Python animation:
-    #animate_path(topF)
+    #animate(start_p,topF[-1])
+    animate_path(top0, "Top0.gif")
+    animate_path(top1, "Top1.gif")
+    animate_path(top2, "Top2.gif")
+    animate_path(topF, "Top3.gif")
     return
 

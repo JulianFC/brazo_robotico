@@ -34,7 +34,7 @@ def init(objective):
 
 def get_individual(toolbox):
     population = toolbox.population(n=100)
-    NGEN = 150
+    NGEN = 100
     for gen in range(NGEN):
         offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.4)
         fits = toolbox.map(toolbox.evaluate, offspring)

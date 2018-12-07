@@ -71,7 +71,7 @@ toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.05, indpb=0.4)
 toolbox.register("select", selection, tournsize=3, alpha=0.8)
 
 population = toolbox.population(n=150)
-NGEN=100
+NGEN=200
 gen0 = 0
 gen1 = int(NGEN*1/3)
 gen2 = int(NGEN*2/3)

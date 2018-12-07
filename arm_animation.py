@@ -1,17 +1,9 @@
-"""
-============
-3D animation
-============
-
-A simple example of an animated plot... In 3D!
-"""
-import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
 from denavit_hartenberg import direct_problem
+import numpy as np
 from math import pi
-
 
 
 
@@ -26,7 +18,7 @@ def update_lines(num, QT, lines, end):
     #    line.set_data(data[0:2, :num])
     #    line.set_3d_properties(data[2, :num])
     #print(P)
-    return
+    return lines
 
 def update_path(num, lines, individual):
     #Theta = [end[0]*num/200, end[1]*num/200, end[2]*num/200, end[3]*num/200]
@@ -43,10 +35,12 @@ def update_path(num, lines, individual):
     return lines
 
 
-def animate_path(individual):
+def animate_path(individual, name):
     # Attaching 3D axis to the figure
     fig = plt.figure()
+    fig.set_tight_layout(False)
     ax = p3.Axes3D(fig)
+
 
     # Fifty lines of random 3-D lines
     #data = [Gen_RandLine(25, 3) for index in range(50)]
@@ -74,10 +68,9 @@ def animate_path(individual):
                                        interval=200, blit=True, repeat=True)
 
     # Set up formatting for the movie files
-    #Writer = animation.writers['ffmpeg']
-    #writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1080)
-    #line_ani.save('Arm.mp4', writer=writer)
+    line_ani.save(name, writer='imagemagick')
     #plt.show()
+
 
     for i in range(4):
         ax.plot3D(QT[0, i:i + 2], QT[1, i:i + 2], QT[2, i:i + 2], linewidth=6)
@@ -86,6 +79,7 @@ def animate_path(individual):
 def animate(start, end):
     # Attaching 3D axis to the figure
     fig = plt.figure()
+    fig.set_tight_layout(False)
     ax = p3.Axes3D(fig)
 
     # Fifty lines of random 3-D lines
@@ -112,12 +106,12 @@ def animate(start, end):
     # Creating the Animation object
 
 
-    line_ani = animation.FuncAnimation(fig, update_lines,  frames=200, fargs=(QT, lines, end),
-                                       interval=10, blit=True,repeat=False)
+    line_ani = animation.FuncAnimation(fig, update_lines,  25, fargs=(QT, lines, end),
+                                       interval=50, blit=False)
 
     # Set up formatting for the movie files
 
-    #line_ani.save('sample.gif', writer='imagemagick')
+    line_ani.save('gfdlñ.gif', writer='imagemagick')
     plt.show()
 
     for i in range(4):
