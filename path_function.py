@@ -21,23 +21,30 @@ def init2d(icls, shape, start, objective):
     Theta = Theta + np.random.uniform(-0.75,0.75,shape)
     return icls(np.random.uniform(-pi,pi,shape))
 
-
+## Indicar en video punto final.
 
 def energy_fitness(individual, start_p, final_p):
     energy = 0
     M = len(individual)
     W = [1.5, 3, 2, 1]
 
-    for i in range(M+1):
-        delta = 0
-        for j in range(4):
+    for j in range(4):
+        V = 0
+        newV = 0
+        A = 0
+        for i in range(M+1):
             if i == 0:
-                delta = delta + W[j]*abs(start_p[j] - individual[i][j])**2
+                newV = start_p[j] - individual[i][j]
+                #V = V + W[j]*abs(start_p[j] - individual[i][j])**2
             elif i == M:
-                delta = delta + W[j]*abs(final_p[j] - individual[i-1][j])**2
+                newV = final_p[j] - individual[i-1][j]
+                #V = V + W[j]*abs(final_p[j] - individual[i-1][j])**2
             else:
-                delta = delta + W[j] * abs(individual[i][j] - individual[i - 1][j])**2
-        energy = energy + delta
+                newV = individual[i][j] - individual[i - 1][j]
+                #V = V + W[j] * abs(individual[i][j] - individual[i - 1][j])**2
+            A = abs(newV-V)
+            V = newV
+            energy = energy + W[j]*newV**2 + W[j]*A**2*0.5
     return energy,
 
 
@@ -93,7 +100,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
     toolbox.register("mutate", mutGaussian, mu=0, sigma=0.05, indpb=0.3, alpha=0.6)
     toolbox.register("select", selection, tournsize=3, alpha=0.8)
 
-    population = toolbox.population(n=150)
+    population = toolbox.population(n=200)
 
     objectives = []
     results = []
@@ -127,10 +134,20 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
         topF = tools.selBest(population, k=1)[0]
         max_fitness_evolution.append(energy_fitness(topF, start_p, final_p)[0])
         X.append(gen)
+
+    top0.append(final_p)
+    top0.insert(0, start_p)
+    top1.append(final_p)
+    top1.insert(0, start_p)
+    top2.append(final_p)
+    top2.insert(0, start_p)
+    topF.append(final_p)
+    topF.insert(0, start_p)
+    M = M+1
     if plot:
         QT = []
         P = []
-        for i in range(M):
+        for i in range(M+1):
             qt, p = direct_problem(topF[i], 4)
 
             QT.append(qt)
@@ -143,7 +160,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
         Theta2 = [[], [], [], []]
         ThetaF = [[], [], [], []]
         for i in range(4):
-            for j in range(M):
+            for j in range(M+1):
                 Theta0[i].append(top0[j][i])
                 Theta1[i].append(top1[j][i])
                 Theta2[i].append(top2[j][i])
@@ -154,7 +171,14 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
             plt.plot(ThetaF[i])
             plt.legend(["Generación " + str(gen0), "Generación " + str(gen1), "Generación " + str(gen2),
                         "Generación " + str(NGEN)])
-            plt.title("Angulo " + str(i))
+            if i == 0:
+                plt.title("Ángulo del tronco")
+            if i == 1:
+                plt.title("Ángulo del brazo")
+            if i == 2:
+                plt.title("Ángulo del antebrazo")
+            if i == 3:
+                plt.title("Ángulo del efector")
             plt.show()
 
         plt.plot(X, max_fitness_evolution)
@@ -173,7 +197,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
         Theta3 = []
         for i in range(4):
             print("[", end='')
-            for j in range(M):
+            for j in range(M+1):
                 if i == 0:
                     Theta0.append(top0[j][i])
                 if i == 1:
@@ -194,7 +218,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
         Theta3 = []
         for i in range(4):
             print("[", end='')
-            for j in range(M):
+            for j in range(M+1):
                 if i == 0:
                     Theta0.append(top1[j][i])
                 if i == 1:
@@ -215,7 +239,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
         print("\n")
         for i in range(4):
             print("[", end='')
-            for j in range(M):
+            for j in range(M+1):
                 if i == 0:
                     Theta0.append(top2[j][i])
                 if i == 1:
@@ -236,7 +260,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
         print("\n")
         for i in range(4):
             print("[", end='')
-            for j in range(M):
+            for j in range(M+1):
                 if i == 0:
                     Theta0.append(topF[j][i])
                 if i == 1:
@@ -256,9 +280,9 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
     print("\nUltimo fitness: " + str(max_fitness_evolution[-1]))
     # Python animation:
     #animate(start_p,topF[-1])
-    animate_path(top0, "Top0.gif")
-    animate_path(top1, "Top1.gif")
-    animate_path(top2, "Top2.gif")
-    animate_path(topF, "Top3.gif")
+    animate_path(top0, start_p, final_p, gen0, "Top0.gif")
+    animate_path(top1, start_p, final_p, gen1, "Top1.gif")
+    animate_path(top2, start_p, final_p, gen2, "Top2.gif")
+    animate_path(topF, start_p, final_p, NGEN, "Top3.gif")
     return
 

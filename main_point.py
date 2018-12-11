@@ -53,6 +53,12 @@ def avg_fitness(population,sp,fp):
         fitness = np.append(fitness, energy_fitness(ind,sp,fp))
     return np.average(fitness)
 
+def mutGaussian(individual, mu, sigma, indpb):
+    M = len(individual)
+    for j in range(4):
+        if random.random() < indpb:
+            individual[j] += random.gauss(mu, sigma)*0.25
+    return individual,
 
 avg_fitness_evolution = []
 start_p = [0,pi/4,-pi/4,-pi/4]
@@ -66,19 +72,19 @@ X = []
 
 toolbox.register("evaluate", energy_fitness, objective=objective, start_p = start_p)
 toolbox.register("mate", tools.cxBlend, alpha=0)
-toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.05, indpb=0.4)
+toolbox.register("mutate", mutGaussian, mu=0, sigma=0.1, indpb=0.4)
 #toolbox.register("select", tools.selTournament, tournsize=2)
 toolbox.register("select", selection, tournsize=3, alpha=0.8)
 
-population = toolbox.population(n=150)
-NGEN=200
+population = toolbox.population(n=100)
+NGEN=250
 gen0 = 0
 gen1 = int(NGEN*1/3)
 gen2 = int(NGEN*2/3)
 gen3 = NGEN
 for gen in range(NGEN):
     avg_fitness_evolution.append(avg_fitness(population, start_p, objective))
-    offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.4)
+    offspring = algorithms.varAnd(population, toolbox, cxpb=0.15, mutpb=0.4)
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):
         ind.fitness.values = fit
