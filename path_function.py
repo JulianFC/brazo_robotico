@@ -61,7 +61,7 @@ def mutGaussian(individual, mu, sigma, indpb,alpha):
         for i in range(M):
             for j in range(4):
                 if random.random() < indpb:
-                    individual[i][j] += random.gauss(mu, sigma)
+                    individual[i][j] += random.gauss(mu, sigma)*0.15
     else:
         sigma = np.random.uniform(M/7,M/2,4)
         mu = np.random.uniform(-M/8,M/8,4)+M/2
@@ -97,7 +97,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("evaluate", energy_fitness, start_p=start_p, final_p=final_p)
     toolbox.register("mate", crossover, indpb=0.45)
-    toolbox.register("mutate", mutGaussian, mu=0, sigma=0.05, indpb=0.3, alpha=0.6)
+    toolbox.register("mutate", mutGaussian, mu=0, sigma=0.05, indpb=0.5, alpha=0.6)
     toolbox.register("select", selection, tournsize=3, alpha=0.8)
 
     population = toolbox.population(n=200)
@@ -108,7 +108,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
     avg_fitness_evolution = []
     X = []
 
-    NGEN = 1000
+    NGEN = 3000
     gen0 = 0
     gen1 = int(NGEN / 3)
     gen2 = int(NGEN * 2 / 3)
