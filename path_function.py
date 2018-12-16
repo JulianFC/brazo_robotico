@@ -77,12 +77,13 @@ def mutGaussian(individual, mu, sigma, indpb,alpha):
 def selection(individuals, k, tournsize, alpha, fit_attr="fitness"):
     chosen = []
     N = int(k*alpha)
-    for i in range(N):
+    for i in range(k-N):
         aspirants = tools.selRandom(individuals, tournsize)
         chosen.append(max(aspirants, key=attrgetter(fit_attr)))
 
-    new = tools.selRandom(individuals,k-N)
-    return chosen+new
+    new = tools.selRandom(individuals, int(N*0.95))
+    best = tools.selBest(individuals, int(N*0.05))
+    return chosen+new+best
 
 def avg_fitness(population,sp,fp):
     fitness = np.array([])
@@ -98,7 +99,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
     toolbox.register("evaluate", energy_fitness, start_p=start_p, final_p=final_p)
     toolbox.register("mate", crossover, indpb=0.45)
     toolbox.register("mutate", mutGaussian, mu=0, sigma=0.05, indpb=0.5, alpha=0.6)
-    toolbox.register("select", selection, tournsize=3, alpha=0.8)
+    toolbox.register("select", selection, tournsize=2, alpha=0.8)
 
     population = toolbox.population(n=200)
 
@@ -108,13 +109,13 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
     avg_fitness_evolution = []
     X = []
 
-    NGEN = 3000
+    NGEN = 20000
     gen0 = 0
     gen1 = int(NGEN / 3)
     gen2 = int(NGEN * 2 / 3)
     for gen in range(NGEN):
         avg_fitness_evolution.append(avg_fitness(population, start_p, final_p))
-        offspring = algorithms.varAnd(population, toolbox, cxpb=0.8, mutpb=1)
+        offspring = algorithms.varAnd(population, toolbox, cxpb=1, mutpb=0.5)
         fits = toolbox.map(toolbox.evaluate, offspring)
         for fit, ind in zip(fits, offspring):
             ind.fitness.values = fit
@@ -171,6 +172,8 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
             plt.plot(ThetaF[i])
             plt.legend(["Generación " + str(gen0), "Generación " + str(gen1), "Generación " + str(gen2),
                         "Generación " + str(NGEN)])
+            plt.ylabel("Valor del ángulo")
+            plt.xlabel("Tiempo")
             if i == 0:
                 plt.title("Ángulo del tronco")
             if i == 1:
@@ -185,7 +188,7 @@ def get_path(start_p, final_p, M, plot=False, matlab=True):
         plt.xlabel("Generación")
         plt.ylabel("Fitness")
         plt.title("Evolución del mejor fitness y el fitness promedio en el tiempo")
-        plt.plot(X, avg_fitness_evolution)
+        plt.semilogy(X, avg_fitness_evolution)
         plt.legend(["Mejor", "Promedio"])
         plt.show()
 
