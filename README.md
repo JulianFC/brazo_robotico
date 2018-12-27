@@ -7,7 +7,7 @@ Nicolás Sepúlveda H.
 
 En el repositorio se encuentran los códigos para calcular la cinemática inversa de un manipulador robótico usando algoritmos genéticos.
 
-Para obtener los resultados, se debe ejecutar el archivo main.py contenido en Python_codes. Este archivo entrega en la consola los siguientes resultados.
+Para obtener los resultados, se debe ejecutar el archivo main.py contenido en Python_codes. Este archivo entrega los siguientes resultados.
 
 1.- Punto Objetivo: En la consola entrega el punto objetivo deseado, el punto objetivo que minimiza energía y el tiempo de ejecución. También muestra el gráfico de fitness punto objetivo y el gráfico de la evolución de la distancia del punto final con respecto al punto inicial.
 
