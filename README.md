@@ -1,8 +1,7 @@
 ## Algoritmos genéticos para resolver la cinemática inversa de un manipulador robótico.
 
 Integrantes: 
-Julián Fuchslocher C.,
-Nicolás Sepúlveda H.
+Julián Fuchslocher C. & Nicolás Sepúlveda H.
 
 
 En el repositorio se encuentran los códigos para calcular la cinemática inversa de un manipulador robótico usando algoritmos genéticos. 
