@@ -13,6 +13,6 @@ Para obtener los resultados, se debe ejecutar el archivo main.py contenido en Py
 
 2.- Trayectoría Óptima: en la consola entrega las trayectorias de 22 puntos para los individuos de la generación 0, de la generación 1/3 del total, de la generación 2/3 del total y de la generación total, también muestra el tiempo de ejecución de este programa. Además muestra los gráficos de la evolución de los ángulos en la trayectoria de los 22 puntos y también muestra el fitness de la trayectoría óptima.
 
-A continuación se muestra un cuadro resumen del proyecto, en la carpeta resultados se encuentran las simulaciones del manipulador.
+A continuación se muestra un cuadro resumen del proyecto, en la carpeta resultados se encuentran simulaciones del manipulador.
 
 <img src="Poster.png" />
